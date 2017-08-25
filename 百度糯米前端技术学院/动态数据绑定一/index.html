@@ -1,9 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-    </head>
-    <body>
-    <script src="index.js"></script>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+
+</body>
+<script>
+    class Observer {
+        constructor(data){
+            this.data = data;
+            this.track(data);
+        }
+        //遍历属性
+        track(data){
+            let keys = Object.keys(data);
+            keys.forEach((item) => {
+                if(typeof data[item] === "object"){
+                    //递归处理
+                    new Observer(data[item]);
+                }
+                this.setProp(item, data[item]);
+            })
+        }
+        // 设置属性
+        setProp(key, val){
+            Object.defineProperty(this.data, key, {
+                enumerable: true,
+                configurable: true,
+                set: function(newval){
+                    console.log(`你设置了${key}`);
+                    console.log(`新的值为${newval}`);
+                    if(val === newval) return;
+                    val = newval;
+                },
+                get: function(){
+                    console.log(`你获取了${key}`);
+                    return val;
+                }
+            })
+        }
+    }
+    let app = new Observer({
+        name: 'youngwind',
+        age: 25,
+        home: {
+            address: "beijing",
+        }
+    });
+    let a = app.data.home.address;
+</script>
+
 </html>
