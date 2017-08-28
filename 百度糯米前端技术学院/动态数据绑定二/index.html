@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    class Observer {
+        constructor(data) {
+            this.data = data;
+            this.handler = {};
+            this.trace(data);
+        }
+        //遍历
+        trace(data) {
+            let keys = Object.keys(data);
+            keys.forEach((key) => {
+                //判断这个属性是否是一个对象
+                if (typeof data[key] == "object") {
+                    new Observer(data[key]);
+                }
+                this.setProp(key, data[key]);
+            })
+        }
+        //设置每个元素的属性
+        setProp(key, val) {
+            let self = this;
+            Object.defineProperty(this.data, key, {
+                enumerable: true,
+                configurable: true,
+                set(newVal) {
+                    if (typeof newVal === "object") {
+                        new Observer(newVal);
+                    }
+                    console.log(`设置${key}为${newVal}`);
+                    if (val !== newVal) {
+                        if (key in self.handler) {
+                            self.emit(key, newVal, val);
+                        }
+                        val = newVal;
+                    }
+                },
+                get() {
+                    console.log(`${key}:${val}`);
+                    return val;
+                }
+            });
+        }
+        $watch(key, callback) {
+            if(!(key in this.data)) return;           
+            this.handler[key] = callback;
+        }
+        emit(key, ...res) {
+            if (key in this.handler) {
+                this.handler[key].apply(this, res);
+            }
+        }
+    }
+    let data = {
+        name: "jack",
+        age: 12,
+        home: {
+            city: "beijing",
+        }
+    }
+    let app = new Observer(data);
+    app.$watch("age", function (newVal, oldVal) {
+        console.log(`${oldVal} change's ${newVal}`);
+    })
+
+</script>
+
+</html>

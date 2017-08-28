@@ -10,15 +10,15 @@
 </body>
 <script>
     class Observer {
-        constructor(data){
+        constructor(data) {
             this.data = data;
             this.track(data);
         }
         //遍历属性
-        track(data){
+        track(data) {
             let keys = Object.keys(data);
             keys.forEach((item) => {
-                if(typeof data[item] === "object"){
+                if (typeof data[item] === "object") {
                     //递归处理
                     new Observer(data[item]);
                 }
@@ -26,31 +26,33 @@
             })
         }
         // 设置属性
-        setProp(key, val){
+        setProp(key, val) {
             Object.defineProperty(this.data, key, {
                 enumerable: true,
                 configurable: true,
-                set: function(newval){
+                set: function (newval) {
                     console.log(`你设置了${key}`);
                     console.log(`新的值为${newval}`);
-                    if(val === newval) return;
+                    if (val === newval) return;
                     val = newval;
                 },
-                get: function(){
+                get: function () {
                     console.log(`你获取了${key}`);
                     return val;
                 }
             })
         }
     }
-    let app = new Observer({
+    let data = {
         name: 'youngwind',
         age: 25,
         home: {
             address: "beijing",
         }
-    });
-    let a = app.data.home.address;
+    }
+    let app = new Observer(data);
+    // let a = app.data.home.address;
+
 </script>
 
 </html>

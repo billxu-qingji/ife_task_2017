@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+</body>
+<script>
+    class PubSub{
+        constructor(){
+            this.handler = {};
+        }
+        on(eventType, callBack){
+            //判断事件类型是否在handler中
+            if(!(eventType in this.handler)){
+                this.handler[eventType] = [];
+            }
+            this.handler[eventType].push(callBack);
+            return this;
+        }
+        emit(eventType, ...res){
+            if(eventType in this.handler){
+                this.handler[eventType].forEach((item) => {
+                    item.apply(this, res);
+                })
+            }
+        }
+    }
+    let pub_sub = new PubSub();
+    pub_sub.on("a", function(str){
+        console.log(str);
+    })
+    pub_sub.emit("a", "hahahha");
+</script>
+</html>
