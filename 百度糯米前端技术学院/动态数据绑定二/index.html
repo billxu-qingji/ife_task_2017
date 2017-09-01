@@ -12,11 +12,42 @@
 
 </body>
 <script>
+    //事件发布订阅模式
+    class Event {
+        constructor() {
+            this.eventBus = {};
+        }
+        //注册事件
+        on(eventType, callback) {
+            if (!this.eventBus.hasOwnProperty(eventType)) {
+                this.eventBus[eventType] = [];
+            }
+            this.eventBus[eventType].push(callback);
+        }
+        //解绑事件
+        off(eventType, event) {
+            //如果event为空则删除该类型的所有事件
+            if (!event) {
+                delete this.eventBus[eventType];
+            } else {
+                //如果不为空则删除对应回调函数
+                let index = this.eventBus[eventType].indexOf(event);
+                this.eventBus.splice(index, 1);
+            }
+        }
+        //触发事件
+        emit(eventType, ...args) {
+            if(!this.eventBus[eventType]) return;
+            this.eventBus[eventType] && this.eventBus[eventType].forEach((item) => {
+                item(...args);
+            })
+        }
+    }
     class Observer {
         constructor(data) {
             this.data = data;
-            this.handler = {};
             this.trace(data);
+            this.eventsBus = new Event();
         }
         //遍历
         trace(data) {
@@ -39,30 +70,24 @@
                     if (typeof newVal === "object") {
                         new Observer(newVal);
                     }
-                    console.log(`设置${key}为${newVal}`);
+                    console.log(`set ${key} to ${newVal}`);
                     if (val !== newVal) {
-                        if (key in self.handler) {
-                            self.emit(key, newVal, val);
-                        }
-                        val = newVal;
+                        self.eventsBus.emit(key, val, newVal);
                     }
+                    val = newVal;
                 },
                 get() {
-                    console.log(`${key}:${val}`);
+                    console.log(`get ${key}:${val}`);
                     return val;
                 }
             });
         }
         $watch(key, callback) {
-            if(!(key in this.data)) return;           
-            this.handler[key] = callback;
-        }
-        emit(key, ...res) {
-            if (key in this.handler) {
-                this.handler[key].apply(this, res);
-            }
+            if (!(key in this.data)) return;
+            this.eventsBus.on(key, callback);
         }
     }
+
     let data = {
         name: "jack",
         age: 12,
@@ -71,8 +96,8 @@
         }
     }
     let app = new Observer(data);
-    app.$watch("age", function (newVal, oldVal) {
-        console.log(`${oldVal} change's ${newVal}`);
+    app.$watch("home", function (newVal, oldVal) {
+        console.log(`${oldVal} change form ${newVal}`);
     })
 
 </script>
